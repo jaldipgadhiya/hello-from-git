@@ -1,0 +1,29 @@
+1. Can we Overload Main Method?
+2. What is polymorphism & Types of polymorphism? What is Static & Dynamic?
+3. What is the difference between overloding and overriding? 
+4. Can we override static methods?
+5. Does Abstract classes and interface are instantiated?
+6. What are the difference between abstract class and interface?
+7. Similarities between abstract class and interface?
+8. What is Maker interface? Ex. of Maker Interfaces.
+9. What is the root class of all Exception? And methods of that class.
+10. Can we write exception handling code inside static block?
+11. Does finally block executed if return statement is present in try block?
+12. What is difference between throw and throws keyword?
+13. Difference between checked and unchecked exception.
+14. What is difference betweem String and StringBuffer?
+15. What is difference betweem StringBuffer and StringBuilder?
+16. What is autoboxing and unboxing?
+17. What is synchronization?
+18. What is the difference between synchronized method and synchronized block?
+19. What is serialization?
+20. What are collection properties?
+21. What is the difference between List and Set?
+22. How to get Synchronized version of arraylist?
+23. When to use ArrayList and LinkedList?
+24. What will happen if we try to insert duplicate object into Set?
+25. What are differences between java.lang.comparable and java.util.comparator? 
+26. What are differences among Enumeration, Iterator & ListIterator Interfaces?
+27. What are differences between HashSet and TreeSet?
+28. What is Map?
+29. What are differences between HashMap and HashTable?
