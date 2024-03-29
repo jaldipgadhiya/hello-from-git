@@ -18,3 +18,55 @@ BEGIN
    -- UTL_HTTP.request('https://your-api-url', 'POST', l_json_input);
 END;
 /
+
+1. write query reports the salary for each employee, along with the average salary of the employees within the department.
+with q1 as
+(select deptno,sal,avg(sal) over(partition by deptno) from emp)
+select * from q1;
+
+2. sum of salary dept wise and job wise
+with q1 as
+(select deptno,sum(sal) over(partition by deptno) dept_wise,sum(sal) over(partition by job) job_wise from emp)
+select * from q1;
+
+3. define rank and dense rank deptwise
+with q1 as
+(select deptno,sal,rank() over(partition by deptno order by sal desc) dept_wise_rank,dense_rank() over(partition by deptno order by sal desc) dept_wise_denserank from emp)
+select * from q1;
+
+4. select * from hr.employees,
+I want the employee details who joined 3rd in each department 
+
+with q1 as
+(select empno,row_number() over(partition by deptno order by hiredate) pos from emp)
+select q1.pos,e.* from q1,emp e
+where q1.empno = e.empno
+and q1.pos = 3;
+
+
+5. Test1 col1, Test2 col1
+1		0
+1		1
+0		0
+1		1
+1		0
+null		null
+		null
+
+output of inner,right,left,full outer join
+
+create table tab1(a number);
+create table tab2(a number);
+insert into tab1 values(1); 
+insert into tab1 values(1);
+insert into tab1 values(0);
+insert into tab1 values(1);
+insert into tab1 values(1);
+insert into tab1 values(null);
+insert into tab2 values(0);
+insert into tab2 values(1);
+insert into tab2 values(0);
+insert into tab2 values(1);
+insert into tab2 values(0);
+insert into tab2 values(null);
+insert into tab2 values(null);
