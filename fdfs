@@ -2,3 +2,19 @@
 {
   "longURL": "https://balicuat.bajajallianz.com/rblPdfGen/service/gen/nafBI?userId=U1\u0026origin=AXISPsForm\u0026appNo=6140376399"
 }
+DECLARE
+   l_url VARCHAR2(4000);
+   l_escaped_url VARCHAR2(4000);
+   l_json_input CLOB;
+BEGIN
+   l_url := 'https://balicuat.bajajallianz.com/rblPdfGen/service/gen/nafBI?userId=U1&origin=AXISPsForm&appNo=6140376399';
+   
+   l_escaped_url := UTL_URL.ESCAPE(l_url);
+
+   l_json_input := '{"longURL": "' || l_escaped_url || '"}';
+
+   -- Call your API with l_json_input
+   -- For example, using UTL_HTTP to make the API call
+   -- UTL_HTTP.request('https://your-api-url', 'POST', l_json_input);
+END;
+/
