@@ -1,0 +1,921 @@
+2. What is referential integrity?
+
+5. How many rows will be inserted?
+BEGIN
+insert into A values(1);
+insert into A values(2);
+execute immediate 'create index idx_b B(id)';
+insert into A values(3);
+insert into A values(4);
+rollback;
+end;
+
+6. If we have PK defined on 3 columns(Composite Key)..can we insert null in any field?
+No
+
+7. I have a table in production which has duplicate data.  I can not delete existing rows because of business rules but somehow I have to prevent any further duplication of data in table. How to acheive it?
+Yes, we can create a primary key on that column with a deferrable novalidate option.
+alter table xyz add constraint pk_con1 primary key (id) deferrable novalidate;
+
+8. Can I create 2 PK on a table?
+NO. But how to asnwer:
+You could certainly mimick a second "primary" key by having an index placed on one or more other fields that are unique. Because what is PK ? PK is UK + Not Null constraint. PRIMARY KEY is usually equivalent to UNIQUE INDEX NOT NULL. So you can effectively have multiple "primary keys" on a single table.
+
+create table test (id number primary key, name varchar2(20) unique not null);
+
+Actually internally it behaves like 2 PK
+
+10. Can we Enable/Diable FK?
+
+2 options: we can drop or we can disable FK
+
+Alter table <table name> DROP constraint <constraint name>;
+
+Disable:
+   ALTER TABLE child_table
+DISABLE CONSTRAINT fk_name;
+
+  ALTER TABLE products DISABLE CONSTRAINT fk_vishal;
+   
+   insert into products values (11,7);
+
+ supplier id 7 is not exists in supplier table, but still data will insert because our FK constraint is disabled. 
+
+--We can enable the FK also by using command:
+     ALTER TABLE product enable CONSTRAINT fk_vishal;
+
+--> we can now enable, but it gives error, if any such record exists which violates the FK rule.(Means for the child , no parent exists) so in that scenario we have to enable with novalidate option
+
+alter table products(child table) enable novalidate constraint fk_vishal;	
+
+11. Does my foreign key have to reference a primary key in another table?
+Answer: NO
+No, it does not. Unfortunately, you’ll come across plenty of documentation that suggests otherwise, when in fact a foreign key can reference a primary key or a unique constraint.
+CREATE TABLE StuffType
+(
+  TypeID number PRIMARY KEY,
+  AltID number UNIQUE,
+  TypeName VARCHAR2(10)
+);
+
+CREATE TABLE OurStuff
+(
+  StuffID number PRIMARY KEY,
+  StuffName VARCHAR2(10) NOT NULL,
+  OurAltID number,
+  CONSTRAINT fk_StuffType FOREIGN KEY (OurAltID)
+    REFERENCES StuffType(AltID)
+);
+
+
+14. We have two table tab1 & tab2. Both the tables have one cloumn named "c" and we have foreign keys on tab1.c referring to tab2.c and tab2.c referring to tab1.c
+How to populate data in both the tables as given below?
+TAB1 TAB2 
+A	A
+B	B
+C  	C
+
+Now, the concept of deferred constraint comes into picture. 
+A deferred constraint is one that is enforced when a transaction is committed.
+A deferrable constraint is specified by using DEFERRABLE clause.
+Once you've added a constraint, you cannot change it to DEFERRABLE. You must drop and recreate the constraint.
+When you add a DEFERRABLE constraint, you can mark it as INITIALLY IMMEDIATE or INITIALLY DEFERRED.
+INITIALLY IMMEDIATE means that the constraint is checked whenever you add, update, or delete rows from a table.
+INITIALLY DEFERRED means that the constraint is only checked when a transaction is committed.
+
+alter table tab1 add constraint tab1_fk foreign key (c) references tab2(c) deferrable initially deferred;
+alter table tab2 add constraint tab2_fk foreign key (c) references tab1(c) deferrable initially deferred;
+
+insert into tab1 values ('A');
+insert into tab1 values ('B');
+insert into tab1 values ('C');
+insert into tab2 values ('A');
+insert into tab2 values ('B');
+insert into tab2 values ('C');
+
+
+15. Can we make ON DELETE CASCADE AND DEFERRABLE BOTH TOGETHER
+
+Yes. Concept is same. 
+alter table tab1 add constraint tab1_fk foreign key (c) references tab2(c) on delete cascade deferrable initially deferred;
+alter table tab2 add constraint tab2_fk foreign key (c) references tab1(c) on delete cascade deferrable initially deferred;
+
+16. Question: Does "creating a primary key constraint" always create an index automatically?
+Yes, But Not always 
+
+Scenario 1:  YES
+
+create table emp(empno number, ename varchar2(10));
+
+alter table emp add constraint pk_emp primary key (empno);
+
+select * from user_constraints where table_name = 'EMP';
+
+select * from user_indexes where table_name = 'EMP';
+
+Scenario 2:  NO
+
+create table emp1(empno number, ename varchar2(10));
+
+create index t1 on emp1(empno);
+
+alter table emp1 add constraint pk_emp1 primary key (empno);
+
+select * from user_constraints where table_name = 'EMP1';
+
+select * from user_indexes where table_name = 'EMP1';
+
+ 
+17. Question: Can we create a NON unique index on a PK column :
+Answer : YES, see the above example. 
+
+18. Question:  Will dropping constraint will drop underlying index?
+
+Yes but not always 
+Refer Concept of Q.16
+
+19. How to display records with order by desc but nulls last.
+
+20. 26. What is the differennce between aggregate function and analytical function? Difference between count(1) and count(*) and count(column_name)?
+nothing, they are the same, incur the same amount of work -- do the same thing, take the same amount of resources.
+
+See the above query. Count function used with any column then it will not consider any null records and gives not null values. Like count(commission_pct) = 35 because in table we have 35 records where commission_pct is not null
+
+25. create table student(
+student_name varchar2(20),
+totaL_marks number,
+year number
+);
+
+StudentName TotalMarks	Year
+Rahul		90	2010		
+Sanjay		80	2010
+Mohan		70	2010
+Rahul		90	2011
+Sanjay		85	2011
+Mohan		65	2011
+Rahul		80	2012
+Sanjay		80	2012
+Mohan		90	2012
+
+insert into student values ('Rahul',90,2010);
+insert into student values ('Sanjay',80,2010);
+insert into student values ('Mohan',70,2010);
+insert into student values ('Rahul',90,2011);
+insert into student values ('Sanjay',85,2011);
+insert into student values ('Mohan',65,2011);
+insert into student values ('Rahul',80,2012);
+insert into student values ('Sanjay',80,2012);
+insert into student values ('Mohan',90,2012);
+
+Write a SQL Query to display Student Name, Total Marks, Year, Prev_Yr_Marks for those whose total_marks are greater than or equal to the previous year.
+
+Student_Name	Total_Marks	Year	Prev_Yr_Marks
+Rahul		90		2011	90		
+Sanjay		85		2011	80	
+Mohan		90		2012	65
+
+with n1 as (
+select STUDENT_NAME,TOTAL_MARKS,YEAR, lag(TOTAL_MARKS,1) over(partition by STUDENT_NAME order by year) as prev_year_mark from student
+) select * from N1 where  TOTAL_MARKS >= PREV_YEAR_MARK;
+
+26. The maximum weight the elevator can hold is 1000.
+
+Write an SQL query to find the name of the last person who will fit in the elevator without exceeding the weight limit. 
+It is guranteed that the person who is first in the queue can fit in the elevator. 
+
+Table Queue
+P_ID	P_NAME		P_W	P_TURN
+5	George W	250	1
+6	Thomas J	400	3
+3	John A		350	2
+4	Thomas R	175	5
+2	Will J		200	4
+1	James E		500	6
+
+with n1 as(
+select t.*, sum(p_w) over(order by p_turn rows between unbounded preceeding and current row) xx from queue_t t
+) select * from n1 where xx = 1000;
+
+27. Write a SQL Query to display Department wise comma separated Employee Ids.  
+Employee table
+ID	DEPT_ID
+10	IT
+20	IT
+30	IT
+40	HR
+50	HR
+60	Admin
+70	Admin
+80	Admin	
+
+select dept_id,listagg(id, ',' on overflow truncate) WITHIN GROUP (ORDER BY id) from employee group by dept_id;
+
+select dept_id,listagg(id, ',' on overflow truncate '!!!') WITHIN GROUP (ORDER BY id) from employee group by dept_id;
+
+select dept_id,listagg(id, ',' on overflow truncate '!!!' WITHOUT COUNT) WITHIN GROUP (ORDER BY id) from employee group by dept_id;
+
+New Feature in 19c
+select listagg(unique id, ',') within group(order by id) from employee;
+
+select listagg(distinct id, ',') within group(order by id) from employee;
+
+28. Tell some inbuilt Numeric, String & Date functions you have worked on.
+29. If we have a string "ABC@34#XYZ$-" and we want to remove special characters except "-" then how can we achive through sql statement?
+30. We have salary field inside EMP table and there are 5 rows out of which 1 row has null value inside salary field.
+   select count(sal) from emp statement will return how many rows? 
+31. What is the difference between case and decode? 
+
+Can we Use case in Having Clause?
+YES
+
+can we write decode in group By ?
+
+YES
+
+can we write decode within decode or case within case. Like multiple checks ?
+
+YES,
+
+32. What is the difference between nvl and nvl2?
+
+33. Suppose we have 2 tables, temp & temp1, both have only 1 column with name z, temp has 3 rows 1,1,1 and temp1 has 2 rows 1,1 
+    select * from temp a,temp1 b where a.z = b.z what will be the output?
+34. What is connect by prior used for?
+35. Why do we use dynamic sql and how to use dynamic sql?
+36. Difference between procedure & function.
+
+
+FUNCTION And PROCEDURE
+
+Function:
+
+PL/SQL function is a reusable program unit stored as a schema object in the Oracle Database.
+
+Use the CREATE FUNCTION statement to create a standalone stored function or a call specification.
+
+A stored function (also called a user function or user-defined function) is a set of PL/SQL statements you can call by name. Stored functions are very similar to procedures, except that a function returns a value to the environment in which it is called. User functions can be used as part of a SQL expression.(Means we can call in a select)
+
+Procedure:
+
+A PL/SQL procedure is a reusable unit that encapsulates specific business logic of the application. Technically speaking, a PL/SQL procedure is a named block stored as a schema object in the Oracle Database. A procedure is a group of PL/SQL statements that you can call by name. 
+
+diff between procedure and function:
+
+1. Function is to compute something and procedure is to execute something
+2. Function must return a value and Procedure may or may not
+3. While creating function, we must have a Return clause else it gives compile error and there is nothing like that in procedure
+4. We can use function is a select statement but we can not use procedure in select statement
+
+
+
+--Why using PL/SQL packages
+The package is a powerful feature of PL/SQL that you should use it in any project. The following are the advantages of the package:
+
+Organized code management
+Packages act like containers for related subprograms. If we have several subprograms for any design in our application – all of it can be bundled into a single package. This is of great help in application development as it makes code easy to locate, understand and reuse.
+Easy (top-down) application design
+We can code and compile a package specification without its body. All we need for dependent programs to work is the interface information in the package specs. The package as well as the stored subprograms that reference it, will compile successfully. This means that we can develop the application in a planned, modular fashion and need not face bottlenecks due to incomplete implementation details.
+Easy changes to implementation
+Changes to a subprogram can create havoc with other programs that reference it. Not so with packages. If only code in the package body is changed, no change is needed in the dependent objects.
+Security and maintainability
+With packages, we can specify which subprograms are public (visible and accessible outside the package) or private (hidden and inaccessible outside the package). For example, if a package contains four subprograms, three might be public and one private. The ability to have private portions in a package ensures that subprograms and other constructs that need not, or SHOULD not, be accessible publicly – remain hidden. This protects the integrity of the package, and also simplifies maintenance – any change to a private element impacts only this package and nothing else.
+Session-wide persistence of variables
+Packaged public variables and cursors persist for the duration of a session. They let us maintain data across transactions without storing it in the database. All subprograms that run in the environment share public package variables and cursors, and will read/edit the same values. This unique feature of PL/SQL packages can be used by applications for storing values with session-wide relevance, such as trace/debug options. 
+Better performance
+When we invoke a packaged subprogram for the first time, the entire package is loaded into memory. Later calls to subprograms in the same package need no disk I/O. This translates to better performance.
+
+PL/SQL package concept is simple but powerful. They allow you to encapsulate the code and make your application easier to develop and maintain.
+
+--Is it possible to define a proc or function in package specification but not implement in body?
+
+No. 
+
+--What is Forward declaration in Oracle?
+
+
+37. Can we have out parameters in functions? What is the use of out parameter in function?
+38. Can we write dml in function?
+
+[dml --> insert,update, delete]
+YES. we can write a dml in function. it will compile and do exactly what is written in the function body.  But it is not advisable because for computation oracle provides us Procedure.
+Note: we can not call such a function in a select statement.
+
+39. Can I write a return statement in a function before DML? What impact in such case
+
+Yes, There is a basic concept that yes we can write DML as we see it in previous examples.  But never forget that basic nature of function is to return something.  so, as soon as it find RETURN clause, it will not go and check further lines.
+
+40. Explain Exception handling. 
+Exception block can be treated as a new independent/isolated block
+	Can we write a function call in Exception/ Can we write a DML in exception
+
+	We can do anything. It is an ACID property implementation. Every transaction is independent.
+	Create a simple function as below for testing:
+
+41. If I declare  Raise_Application_Error with error numbers not in 20000 and 20999, 
+There son't be any compilation error. it will throw error that out of range when that particular exception will be raised.All other numbers belong to Oracle for its own errors.
+42. Difference Between Raise Application Error And Pragma Exception INIT
+PRAGMA EXCEPTION_INIT allows to associate an Oracle error number with the name of a user-defined error. Here you need to defined user-defined exception before it is used in PRAGMA EXCEPTION_INIT. 
+There are two parameters: exception name and error code.
+
+RAISE_APPLICATION_ERROR allows to create meaningful error msg.it works with un-named user defined exceptions. It associates the number of the error with the text of the error. Therefore, the user-defined exception does not have a name associated with it.
+
+There are two uses for RAISE_APPLICATION_ERROR. The first is to replace generic Oracle exception messages with our own, more meaningful messages. The second is to create exception conditions of our own, when Oracle would not throw them 
+
+Explain Pragma Exception Init 
+
+Remember Pragma Exception init is used to give a name to oracle standard message (less than 20000)
+Raise Application error is used to give message to user defined error. 
+
+Declare  
+    v_supp_id number := 1;
+    child_found exception;
+    pragma exception_init(child_found, -02292);
+Begin    
+delete from supplier where supplier_id = v_supp_id;
+Exception
+    when child_found then  
+        dbms_output.put_line('this is not allowed, child data existss. yopu can not do this');
+End;
+
+43. What is Pragma? What are different types of Pragmas have you used in your project.
+44. What is the practical use of Pragma autonomous_transaction. Give one example.
+45. What is returning clause?
+46. What are different types of triggers? Why we need Triggers? Can we write commit inside triggers?
+YES, we can do the commit inside the trigger but for this we have to make that transaction independent of the parent transaction. It means, we have to use pragma autonomous transactions to make this happen. In the Normal scenario, we can not.
+
+ 
+If we create a trigger using commit inside, it does not give any error while trigger creation. It will Run time error when that trigger is called. 
+
+47. I wrote a select statement and it fetch 500 records. which trigger will fire?
+
+Answer: NO. Trigger will not fire, because it only fire on DML,i.e insert/update/delete
+
+48. Explain Mutating Triggers.
+
+Mutates means, it is changing. Something that is changing is hard to analyze and to quantify. A mutating table error (ORA-04091) occurs when a row-level trigger tries to examine or change a table that is already undergoing change (via an INSERT, UPDATE, or DELETE statement). In particular, this error occurs when a row-level trigger attempts to read or write the table from which the trigger was fired. Fortunately, the same restriction does not apply in statement-level triggers.
+
+We discussed triggers, but just to recall, Here are some important items to remember about triggers.
+
+On insert triggers have no :OLD values.
+On delete triggers have no :NEW values.
+Triggers do not commit transactions. If a transaction is rolled back, the data changed by the trigger is also rolled back.
+Commits, rollbacks and save points are not allowed in the trigger body. A commit/rollback affects the entire transaction, it is all or none.
+Unhandled exceptions in the trigger will cause a rollback of the entire transaction, not just the trigger.
+If more than one trigger is defined on an event, the order in which they fire is not defined. If the triggers must fire in order, you must create one trigger that executes all the actions in the required order.
+A trigger can not change a table that it has read from. This is the mutating table error issue.
+A mutation table is defined as a table that is changing.Mutating error normally occurs when we are performing DML operations and the trigger fired and we are trying to select the affected record from the same trigger. So, basically we are trying to select the record in the trigger from the table who owns the trigger. This creates consistency and throw error, which is called mutating error.
+
+When we talk about a solution, please do not talk about compound triggers directly. Every knows that it is written on the internet. Try to discuss solutions.
+
+1. Do Not use triggers - The best way to avoid the mutating table error is not to use triggers.  Most PL/SQL developers avoid triggers unless absolutely necessary. As it impacts performance as well
+ 
+2. If possible can we use Statement level, because mutating comes only with Row Level.
+
+3. From Oracle 11g Onwards, we have a Compound Trigger to avoid mutating tables with a combination of row-level and statement-level triggers.
+ 
+4. Use autonomous transactions - You can avoid the mutating table error by marking your trigger as an autonomous transaction, making it independent from the table that calls the procedure.
+
+49. What is compound Trigger?
+Create or replace trigger MutatingTrigger_Test
+For Update on test
+Compound Trigger
+
+           v_count number;
+After Each Row Is
+    BEGIN
+        dbms_output.put_line('Updation Done');
+    End After Each Row;
+
+    After Statement Is
+    Begin
+              select count(*) into v_count from test where status = 'Active';
+              dbms_output.put_line('Total number of active '||v_count);
+    End After Statement ;
+End MutatingTrigger_Test;
+
+50. What is the difference between View and Materializd View?
+
+51. How to make a view non updatable?
+with read only
+
+WITH READ ONLY Specify WITH READ ONLY to indicate that the table or view cannot be updated.
+WITH CHECK OPTION Specify WITH CHECK OPTION to indicate that Oracle Database prohibits any changes to the table or view that would produce rows that are not included in the subquery.
+
+52. What is the instead of trigger? Syntax to create Instead of Triggers.
+53. Can we update & alter MVs? If Yes How? 
+
+By default, no. Materialized views aren't updatable. See the below Steps:
+
+table Created:
+
+create table t (
+  x int primary key, y int
+);
+
+Data Inserted:
+
+insert into t values (1, 1);
+insert into t values (2, 2);
+commit;
+
+MV Log created, because we want fast refresh:
+
+create materialized view log on t 
+
+Lets Create the Materialized View:
+
+create materialized view mv 
+refresh fast 
+as 
+  select * from t;
+  
+Now letsUpdate:
+update mv
+set    y = 3;
+
+But you can use the "for update" clause to change the data in an MV:
+Lets Drop and recreate the MV:
+
+drop materialized view mv ;
+
+create materialized view mv 
+refresh fast for update 
+as 
+  select * from t;
+
+Note that the changes aren't pushed to the base table. As soon as you refresh it, the changes are lost:
+
+--can we alter materialized View 
+
+YES. 
+Use the ALTER MATERIALIZED VIEW statement to modify an existing materialized view in one or more of the following ways:
+
+To change its storage characteristic
+To change its refresh method, mode, or time
+To alter its structure so that it is a different type of materialized view
+alter table mv add z number;
+
+
+
+
+54. Can we have GROUP BY clauses or aggregates with Fast Refresh Materialized View with multiple table Joins?
+--Fast Refresh Materialized View with multiple table Joins
+Yes, but every table must contain its own MV log on rowid like below:
+
+create materialized view log on emp with rowid;
+create materialized view log on dept with rowid;
+
+And while creating MV, we must select rowid in query
+create materialized view empdept_mv
+refresh fast on commit as
+select e.rowid r_rowid, d.rowid d_rowid, e.empno, e.ename, d.deptno, d.dname from emp e, dept d where e.deptno = d.deptno;
+
+ And make sure that They cannot have GROUP BY clauses or aggregates
+
+55. Merge
+
+Merge Restrictions:
+
+There are a couple of things you need to watch for in the when matched clause. You can only update:
+
+1. columns not in the join clause
+2. each row once (if source have duplicate, can not do merge)
+3. Delete is used only with "When Matched". Delete can not be used with "When NOt Matched"
+
+Example with DELETE MERGE:
+
+create table bricks_for_sale (
+  colour   varchar2(10),
+  shape    varchar2(10),
+  price    number(10, 2)
+);
+
+create table purchased_bricks (
+  colour   varchar2(10),
+  shape    varchar2(10),
+  price    number(10, 2)
+);
+
+insert into bricks_for_sale values ( 'red', 'cube', 4.95 );
+insert into bricks_for_sale values ( 'blue', 'cube', 7.75 );
+insert into bricks_for_sale values ( 'blue', 'pyramid', 9.99 );
+
+No records in table purchased_bricks. lets do merge:
+
+update bricks_for_sale set price = 0.99;
+insert into bricks_for_sale values ( 'red', 'pyramid', 5.99 );
+insert into purchased_bricks values ( 'green', 'cube', 9.95 );
+
+merge into purchased_bricks pb
+using bricks_for_sale bfs
+on    ( pb.colour = bfs.colour and pb.shape = bfs.shape )
+when not matched then
+  insert ( pb.colour, pb.shape, pb.price )
+  values ( bfs.colour, bfs.shape, bfs.price )
+when matched then
+  update set pb.price = bfs.price
+  delete where pb.color = 'red';
+
+56. Explain what is cursor? Types & Attributes of cursors and Cursor with FOR UPDATE/ WHERE CURRENT OF.
+
+Cursor FOR UPDATE/ WHERE CURRENT OF
+Sometimes, you want to lock a set of rows before you can update them in your program.
+Oracle provides the FOR UPDATE clause of the SELECT statement in an updatable cursor to perform this kind of locking mechanism. Syntax as below:
+
+CURSOR cursor_name IS
+    SELECT select_clause
+    FROM from_clause
+    WHERE where_clause
+    FOR UPDATE;
+
+Once you open the cursor, Oracle will lock all rows selected by the SELECT ... FOR UPDATE statement in the tables specified in the FROM clause.
+And these rows will remain locked until the cursor is closed or the transaction is completed with either COMMIT or ROLLBACK. 
+
+create table employ as select * from hr.employees
+
+declare  
+    cursor c1 is  
+    select * from employ where department_id = 90 for update;
+     
+    r c1%rowtype;
+Begin
+    open c1;
+    loop
+    fetch c1 into r;
+    exit when c1%notfound;
+    update employ set salary = 500 where current of c1;
+    dbms_output.put_line(r.first_name);
+    End Loop;
+    close c1;
+ 
+End;
+
+Facts About Cursor:
+
+Cursor Is a memory Object that will be stored inside RAM memory.
+Main advantage of using a cursor is when we need row by row processing we need cursor .
+The TOO_MANY_ROWS error occues when a select gives more than requested data, Cursor help us to avoid this error. 
+
+Implicit
+Oracle Internally creates Implicit cursor
+Can not give a name to implicit cursor
+Whenever any statement executes (select/insert/update/delete ) it creates Implicit cursor
+status of Implicit cursor can be found via sql%rowcount
+Explicit
+Declare Cursor to Initializing memory
+Open cursor for Allocation Memory
+Fetch cursor for retrieving records
+Close cursor for releasing memory
+
+
+--can we return more than 1 value from function?
+
+Yes -->
+        1. Pipelined Function
+  2. Sys ref cursor  
+
+---------------------------------------------------------------------------
+1. PIPELINED FUNCTION
+
+It is used for direct query the function instead of table. Suppose we have a requirement where we have to query /fetch data from function instead of table, pipelined function gives us that fliexibility.
+
+create table city (city_id number, city_name varchar2(20));
+
+Insert into city values (101,'Newyork');
+Insert into city values (102,'Chicago');
+Insert into city values (103,'Canada');
+Insert into city values (104,'Noida');
+Insert into city values (105,'Virginia');
+
+Step 1: Create an object the represents one row of the results:( the thing what we want as output )
+
+CREATE OR REPLACE TYPE city_type
+AS OBJECT
+(
+    city_id VARCHAR(6),
+    city_name VARCHAR(60)    
+);
+
+Step 2: Create a collection (table type) of the object type created in step 1
+
+CREATE OR REPLACE TYPE city_table_type AS TABLE OF city_type;
+
+Step 3: Create a function that returns the table type from step 3
+
+CREATE OR REPLACE FUNCTION fnc_Get_Cities_Pipelined
+  RETURN city_table_type   ------> This is the return type of output. as in normal we give here return tyle like number, varchar, but here more than 1 value and that can be any datatype, so we return the type. 
+  PIPELINED  --> keyword, so that oracle understand that this is pipelined function
+AS
+BEGIN
+
+    FOR v_Rec IN (SELECT * FROM city) LOOP
+
+        PIPE ROW (city_type(v_Rec.City_Id, v_Rec.City_Name));
+
+    END LOOP;
+
+    RETURN;
+END;
+
+
+--> From Oracle 12C onwards we can call pipelined function with table keyword as well:
+--> WE CAN USE THIS FUNCTION EXACTLY LIKE A TABLE AND WE CAN SELECT ANY NUMBER OF COLUMN FROM TYPE WE CREATED AND ALSO WE CAN USE WHERE CLAUSE LIKE QUERYING A TABLE.
+
+--> Why RETURN is empty in pipelined function
+
+
+===*Difference between pipeline function and table function*
+
+Regular table functions require collections to be fully populated before they are returned where as PIPELINED FUNCTION use the PIPE ROW call to push rows out of the function as soon as they are created, rather than building up a table collection. saving memory and allowing subsequent processing to start before all the rows are generated.
+
+Please note the word, 'Streaming'.. And in our function we define how many rows we stream.. Every streamed row is immediately available to the caller. Pipelining means in lay man terms, dont make me wait till you complete, give me what ever you have, and keep processing and updating me simultaneously. And, a normal table function will keep waiting until all processing work is done, and then it will return the reference to the result set cursor.
+
+pipelined functions , they claim to save memory, is by flushing the content immediately, and hence the buffer being used is always minimal, whereas the round trips count get higher.
+
+Pipelining enables a table function to return rows faster and can reduce the memory required to cache a table function's results.
+
+RETURN is empty because in Pipelined function PIPE ROW is responsible for returning data from function. Return clause must be mentioned because of the basic nature of a function that it must have a return clause, but it is not responsible for returning data.
+From 12c onwards even we do not need a RETURN clause. Its not mandatory.  
+
+ 
+
+57. Difference between rowid & rownum.
+ROWID	                           ROWNUM 
+1.ROWID is nothing but Physical memory allocation
+2.ROWID is permanent to that row which identifies the address of that row.
+
+3.ROWID is 18 digit Octadecimal number which is uniquely identifies the rows.
+
+4.ROWID returns PHYSICAL ADDRESS of that row.
+
+5. ROWID is automatically generated unique id of a row and it is generated at the time of insertion of row.
+
+6. ROWID is the fastest means of accessing data.
+
+1. ROWNUM is nothing but the sequence which is allocated to that data retrieval bunch.
+2. ROWNUM is temporarily allocated sequence to the rows.
+
+3.ROWNUM is numeric sequence number allocated to that row temporarily.
+
+4.ROWNUM returns the sequence number to that row.
+
+5. ROWNUM is an dynamic value automatically
+retrieved along with select statement output.
+
+6.ROWNUM is not related to access of data.
+
+58. Fetch first N rows.
+
+For limit the number of rows in output, we have one more option from oracle12c onwards that is called FETCH. In case of FETCH also , ORDER BY is NOT the last operation. 
+
+Fetching first 5 rows of hr.employees table ordered by salary
+
+SELECT first_name, last_name, salary
+  FROM hr.employees
+ ORDER BY salary DESC
+ FETCH FIRST 5 ROWS ONLY;
+
+Skip first 5 rows and fetch next 2 rows.
+
+SELECT first_name, last_name, salary
+  FROM hr.employees
+ ORDER BY salary DESC
+OFFSET 5 ROWS FETCH NEXT 2 ROWS ONLY;
+
+Handling Ties
+
+SELECT first_name, last_name, salary
+  FROM hr.employees
+ ORDER BY salary DESC
+OFFSET 5 ROWS FETCH NEXT 2 ROWS WITH TIES;
+
+Per Cent top-N Queries
+
+A top-N query per cent is also possible. The number of rows to be returned is always a ceiled value (eg. 5% of 107 rows equals 5.35 which will be ceiled to 6 rows).
+
+SELECT first_name, last_name, salary
+  FROM hr.employees
+ ORDER BY salary DESC
+ FETCH FIRST 5 PERCENT ROWS ONLY;
+
+59. What are different types of indexes? Explain working of all these indexes and in which index need to be used in which condition?
+60. what is the difference between unique index & unique constraint.
+61. How can I make an index that can be used by a CASE statement?
+
+How can I make an index that can be used by a CASE statement?
+
+where post_id = 700
+and SOURCE_TRANANSACTION = "PO"
+and
+case SOURCE_TRANANSACTION when 'PO' then BLOCK_ID when 'VOUCHER' then voucher_id ELSE journal_id end = '34351'
+
+Using function-based indexes (FBI) you can create an index on any built-in function, including a CASE expression.  Here we use CASE within the create index syntax:
+
+create index
+case_index as
+(case SOURCE_TRANANSACTION when 'PO' then BLOCK_ID when 'VOUCHER' then voucher_id ELSE journal_id end = '34351'
+END);
+
+Once created, you need to analyze statistics.
+
+62. Can we Create a Function based Index on an expression, like some calculation 
+
+Yes. 
+create index inx_simp_int on loan_data(prin_amount*number_of_years*rate_of_int/100);
+
+63. Does FTS(Full Table Scan) is bad and Oracle must have to follow Index?
+So, Its not necessary that FTS is always bad. Its oracle decide which is better. How to decide, the one important factor is "Clustering factor".  
+The clustering factor
+is a counter that the database calculates when gathering statistics on a table. For each index it walks down the entries and for each entry asks: is this in the same block as the previous entry? If the answer is no it increments the counter. If it's the same then it leaves it untouched.  Means , for the first record Clustering factor = 1 and it check where is next record? If next record in same data block as the first record then Clustering factor is untouched and value = 1 only and it go and check the next record, if next record in other data block then Clustering factor will increase by 1 and value of Clustering factor = 2.  then   So we end up with a value which has a lower bound of the number of blocks in the table and an upper bound of the number of rows in a table. So the higher the clustering factor is the more scattered throughout the table the rows are relative to the order in the index.
+
+This is one of the reason that even we have Index but oracle choose FTS rather than index scan. 
+
+64. How To Create Index on NULL Data
+
+By default, Oracle doesn’t index an entry if all columns within the index are NULL. it’s possible to index all possible NULL values by simply adding a constant value to the index column list. Importantly, the CBO knows when a column has all it’s NULL values indexed and can potentially use the index accordingly. 
+
+Oracle does not store NULL values in indexes, so even if an index did exist on the TABLE1.COL1 column, it would not be usable. there is a helpful trick with indexes to help tune this statement. Create an index and add a constant value to the end of the index so NULL values are stored.
+
+UPDATE table1
+ SET col1 = :1
+ WHERE col1 IS NULL;
+
+The above query will do full table scan, then we create index like below:
+
+ CREATE INDEX t1 ON table1(col1, 1);
+
+NULLs are basically considered to be potentially the largest value possible by Oracle and so are all grouped and sorted together at the “end” of the index structure.
+
+65. What is Index skip scan
+
+An index skip scan occurs when the initial column of a composite index is "skipped" or not specified in the query.
+You can force an index skip scan with the /*+ index_ss */ hint.
+Scenario: I have a table A with columns (f1,f2,f3), and I made the composite primary key with f1 and f2. Index IND1 got created for the composite primary key by oracle. I am able see that index IND1 being used when I query like this:
+
+1) where f1=
+
+2) where f1= and f2=
+
+But the index IND1 is not being used for the below query
+
+3) where f2= Why does the index not work when I reference the f2 key?
+The index skip scan promises that there is no need to build a second index on the emp_id column. Oracle acknowledges that the index skip scan is not as fast as a direct index lookup, but states that the index skip scan is faster than a full-table scan
+
+66. Index Monitoring
+
+Suppose a table have multiple indexes, so how do we know that all indexes are useful. The database maintains all indexes defined against a table regardless of their usage.Index maintenance can cause significant amounts of CPU and I/O usage. With this in mind, it makes sense to identify and remove any indexes that are not being used as they are a pointless drain on resources.
+The presence of unused indexes has detrimental effects:
+
+- Wasted disk space
+- Higher DML overhead (updates, inserts, deletes)
+Index monitoring allows you to quickly identify indexes that are not being used by the database, so that they can be dropped.  The best way is to remove the unused indexes from the tables.
+
+Index monitoring is started and stopped using the ALTER INDEX syntax shown below.
+
+ALTER INDEX MONITORING USAGE; — Enable monitoring of the index
+ALTER INDEX NOMONITORING USAGE; — Disable monitoring of the index
+
+After enabling the monitoring, run the application and then We can check in the below tables that index are used or not. 
+
+select * from user_object_usage
+select * from v$object_usage
+
+61. What is bulk binding and bulk exception?
+
+The keywords BULK COLLECT tell the SQL engine to bulk-bind output collections before returning them to the PL/SQL engine.
+The keyword FORALL instructs the PL/SQL engine to bulk-bind input collections before sending them to the SQL engine. Although the FORALL statement contains an iteration scheme, it is not a FOR loop. Its syntax follows:
+
+declare  
+ 
+TYPE t_emp_data IS TABLE OF employees%ROWTYPE;
+t_emp_data_aa t_emp_data;
+DML_ERRORS EXCEPTION;  
+PRAGMA EXCEPTION_INIT (DML_ERRORS, -24381);
+v_errcount number;
+BEGIN
+   SELECT * BULK COLLECT INTO t_emp_data_aa
+     FROM employees;
+ 
+     FORALL x in t_emp_data_aa.First..t_emp_data_aa.Last save exceptions
+     INSERT INTO t3 VALUES t_emp_data_aa(x) ;
+     EXCEPTION
+   --BULK_ERRORS exception handler--
+   WHEN DML_ERRORS
+   THEN
+    v_errcount := SQL%BULK_EXCEPTIONS.COUNT;
+     dbms_output.put_line(v_errcount);
+     for i in 1 .. SQL%BULK_EXCEPTIONS.COUNT Loop  
+      dbms_output.put_line('error code is '||SQL%BULK_EXCEPTIONS(i).error_code);
+      dbms_output.put_line('error code is '||SQL%BULK_EXCEPTIONS(i).error_Index);
+      dbms_output.put_line('Error Message is: ' || SQLERRM('-' || SQL%BULK_EXCEPTIONS (i).ERROR_CODE));
+     End Loop;
+END;
+
+63. Explain DML Error Logging. Which one to use DML Error Logging or FORALL…SAVE EXCEPTIONS?
+
+DML error logging enables you to write INSERT, UPDATE, MERGE, or DELETE statements that automatically deal with certain constraint violations. 
+
+
+<DML statement>
+LOG ERRORS INTO<error_logging_table>
+REJECT LIMIT <reject limit value>;
+
+Insert into employees select * from t3 
+log errors into ERR$_EMPLOYEES('INSERT') reject limit unlimited;
+
+If the error count exceeds the reject limit value, the DML statement terminates and all changes made are rolled back.
+The default reject limit value is 0.
+If you want the DML to go through regardless of the count of errors, set REJECT LIMIT UNLIMITED.
+
+Error Logging Table Name:
+When creating the error logging table automatically, you can specify its name in the DBMS_ERRLOG parameters.
+
+If the error logging table name is unspecified, it is given a default name of this form:
+
+ERR$_ || first 25 characters of <dml_target_table>
+
+Example:
+dml_target_table name: EMP
+error_logging_table name: ERR$_EMP
+
+Which to Use: DML Error Logging or FORALL…SAVE EXCEPTIONS?
+
+When both DML Error Logging and FORALL…SAVE EXCEPTIONS give you performance/exception handling benefits for transactions with large data volume, which is the preferred approach?
+
+The question doesn’t have an all-encompassing “this approach” answer – if it did, Oracle would probably not have two ways of doing the same thing. You would need to analyse your requirements/benchmark for both approaches.
+
+DML Error Logging can be very fast if you can use direct-path load (INSERT /*+ APPEND */) and if there are no indexes on the target table.
+
+FORALL…SAVE EXCEPTIONS is faster than row-by-row processing, but might not be as fast as direct-path load with DML Error Logging.
+
+Even if you can use direct-path load, there are factors other than speed to consider:
+
+Locking: direct-path load locks the object while it’s in action; bulk DML does not.
+Free space utilization: direct-path load does not utilise existing free space, which bulk DML does.
+Transaction management: direct-path load needs a commit/rollback right  after completion*; bulk DML does not and can support further processing in the same transaction.
+
+64. What is PL/SQL tables? Attributes of PL/SQL tables. Associative Arrays, VARRAYs, Nested Tables. which one have you used in your project?
+
+We have a received a new requirement of storing below mentioend details in Database and for that we need to create one backend procedure and provide it to another team for calling.
+What will be your approach.
+
+"RecommendedProducts":[
+{
+	"CompanyName":"ABC"
+	"ProductNames":["p1","p2","p3"]
+},
+{
+	"CompanyName":"DEF"
+	"ProductNames":["p1","p2","p3"]
+}
+]
+
+
+65. Direct Path Inserts.
+
+While performing DML if a table is to be loaded with huge data, you can get good performance with BULK operation. BULK Collect and FORALL is introduced with oracle programming to enhance the performance of DML. operation
+If using BULK insert – Use optimizer hint ‘APPEND’ and ‘NO LOGGING’, if redo buffer information is not required. This makes the insert operation faster.
+Direct-load INSERT with logging: This mode does full redo logging for instance and media recovery. Logging is the default mode.
+Direct-load INSERT with no-logging: In this mode, data is inserted without redo or undo logging.
+ALTER TABLE Tablename NOLOGGING;
+
+
+use Direct Load Insert, add the APPEND hint to your INSERT statement.  The combination of Direct-Path INSERT and NOLOGGING supports a very efficient load performance. But the price for it is that you are not able to recover lost data from the archive redo log files.
+
+INSERT /*+ APPEND*/
+INTO my_table
+SELECT * FROM my_other_table
+
+
+A major benefit of direct-load INSERT is that you can load data without logging redo or undo entries, which improves the insert performance significantly.
+
+Direct-load INSERT updates the indexes of the table, but CREATE TABLE ... AS SELECT only creates a new table which does not have any indexes
+
+A very efficient way to load data into a table is Direct-Path INSERT. Unlike a conventional INSERT, new rows are not applied to the database buffer cache row by row, but written directly to the data files in new data blocks at the end of the table. Because a Direct-Path INSERT bypasses the space management to reuse free space in the existing blocks, it is much faster to insert multiple rows into a target table. It is highly recommended to use Direct-Path INSERT for loading large data sets into a data warehouse database.
+
+
+Direct-Path INSERT
+Oracle Database inserts data into a table in one of two ways:
+
+During conventional INSERT operations, the database reuses free space in the table, interleaving newly inserted data with existing data. During such operations, the database also maintains referential integrity constraints.
+During direct-path INSERT operations, the database appends the inserted data after existing data in the table. Data is written directly into datafiles, bypassing the buffer cache. Free space in the table is not reused, and referential integrity constraints are ignored. Direct-path INSERT can perform significantly better than conventional insert.
+
+Direct Load Insert only works for INSERT INTO .. SELECT .... Inserts using the VALUES clause will use conventional insert.
+Direct Load Insert locks the table in exclusive mode. No other session can insert, update, or delete data, or maintain any indexes.
+Referential Integrity (Foreign Key) constraints and triggers must be disabled before running Direct Path Insert
+
+
+
+66. Have you worked on Performance Tuning? What is explain plan? How to read it?  How do I query to find long-running queries?
+Answer:  You can query the v$session_longops view to find long-running queries and you can query the AWR to find historical queries.You can view any SQL statement that executes for more than 6 absolute seconds (the "long running" threshold) using the v$session_longops view.
+You can check long running sessions using v$session_longops script which will show you, % completed, remaining time, so far completed and much more detailed information.
+
+Plan Hash Value: When we execute any sql statement in Oracle, a hash value is being assigned to that sql statement and stored into the library cache. So, that later, if another user requests the same query, then Oracle find the hash value and execute the same execution plan.
+
+STALE Stats : To see if Oracle thinks the statistics on your table are stale, you want to look at the STALE_STATS column in DBA_STATISTICS. If the column returns “YES” Oracle believes that it's time to re-gather stats. However, if the column returns “NO” then Oracle thinks that the statistics are up-to-date.
+
+
+67. What is sql hints? Tell some sql hints you have worked on?
+
+68. What is the most challanging situation in your project have you faced ?
