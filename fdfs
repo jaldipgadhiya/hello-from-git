@@ -82,3 +82,59 @@ Dynamic pruning occurs at run-time, meaning that the exact partitions to be acce
 
 A sample scenario for static pruning is a SQL statement containing a WHERE condition with a constant literal on the partition key column. 
 An example of dynamic pruning is the use of operators or functions in the WHERE condition.
+
+Local And Global Index 
+
+Indexes on partitioned tables can either be nonpartitioned or partitioned. As with partitioned tables, partitioned indexes improve manageability, availability, performance, and scalability. They can either be partitioned independently (global indexes) or automatically linked to a table's partitioning method (local indexes). In general, you should use global indexes for OLTP applications and local indexes for data warehousing or decision support systems (DSS) applications.
+
+Local Index
+
+Local index is where the index is equi partitioned with its table, the index is partitioned on the same columns, with the same number of partitions and the same partition bounds as its table. So each index partition is associated with exactly one partition of the underlying table, that is, all keys in an index partition refer only to rows stored in a single corresponding table partition. Local indexes can be subpartitioned.
+
+Example for local index definition:
+CREATE BITMAP INDEX SH.SALES_CUST_BIX ON SH.SALES (CUST_ID) LOCAL;
+
+Local partitioned indexes are easier to manage than other types of partitioned indexes. They also offer greater availability. 
+The reason for this is equipartitioning: each partition of a local index is associated with exactly one partition of the table.This functionality enables Oracle to automatically keep the index partitions synchronized with the table partitions, and makes each table-index pair independent. Any actions that make one partition's data invalid or unavailable only affect a single partition.
+
+Global Index
+
+Global index is an index which is not local. It can be partitioned or non partitioned. If it is partitioned, then it is normally not equi partitioned with the table, a single index partition can point to any or all table partitions. Global range partitioned indexes are flexible in that the degree of partitioning and the partitioning key are independent from the table's partitioning method.
+You cannot add a partition to a global index because the highest partition always has a partition bound of MAXVALUE. 
+To add a new highest partition, use the ALTER INDEX SPLIT PARTITION statement.
+You cannot drop the highest partition in a global index.
+===================================================================
+
+Can I create a UNIQUE partitioned index?
+
+A local index can be created UNIQUE if the index partitioning columns form a subset of the index columns. This restriction guarantees that rows with identical index keys always map into the same partition, where uniqueness violations can be detected.
+
+Global partitioned index can be created UNIQUE index since the partitioning columns always form a subset of the index columns.
+
+=====================================================================
+
+Can I create a partitioned bitmap index?
+Yes, as a local index. Bitmap index cannot be global partitioned index, it can only be local or non partitioned
+
+What types of partitioning can I choose for a global index?
+Global partitioned index can be partitioned only by range or by hash. In a range partitioned global index, each index partition contains values defined by a partition bound. In a hash partitioned global index, each partition contains values determined by the Oracle Database hash function.
+
+Can I subpartition global index?
+No you cannot subpartition global index
+
+=========================================================================
+
+What are the performance implications of local indexes?
+Availability is increased because actions that make data invalid or unavailable in a partition affect this partition only.  
+Partition maintenance is simplified. When moving a table partition, or when data ages out of a partition, only the associated local index partition must be rebuilt or maintained.
+
+What are the performance implications of global indexes?
+Global index can be useful where rapid access, data integrity, and availability are important. In an OLTP system, a table may be partitioned by one key, for example, the employees.department_id column, but an application may need to access the data with many different keys, for example, by employee_id or job_id. Global indexes can be useful in this scenario as global indexes are prefixed and can provide better performance than local nonprefixed indexes because they minimize the number of index partition probes
+
+
+Global indexes are harder to manage than local indexes. At partition maintenance of the table, all partitions of a global index are affected.
+
+=========================================================================
+
+How to Determine Whether an Index is Global or Local
+To determine whether an index is global or local, query the column, LOCALITY, in DBA_PART_INDEXES.
