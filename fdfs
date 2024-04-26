@@ -19,6 +19,19 @@ BEGIN
 END;
 /
 
+Answer will be: when create the table use the concept of virtual column
+That we have to define always generated as (what ever expression)
+
+ create table PERSON (
+id_1 number, id_2 number, id_3 number,
+ all_id GENERATED ALWAYS AS (id_1+id_2+id_3) virtual
+);
+
+insert into person(id_1,id_2,id_3) values (1,2,3);
+
+select * from person;
+
+
 1. write query reports the salary for each employee, along with the average salary of the employees within the department.
 with q1 as
 (select deptno,sal,avg(sal) over(partition by deptno) from emp)
