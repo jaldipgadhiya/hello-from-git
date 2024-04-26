@@ -70,3 +70,15 @@ insert into tab2 values(1);
 insert into tab2 values(0);
 insert into tab2 values(null);
 insert into tab2 values(null);
+
+Partition Pruning
+
+Oracle partition pruning is a divided and conquer approach.Partition pruning is an essential performance feature. In partition pruning, the optimizer analyzes FROM and WHERE clauses in SQL statements to eliminate unneeded partitions when building the partition access list. This functionality enables Oracle Database to perform operations only on those partitions that are relevant to the SQL statement.
+Partition pruning dramatically reduces the amount of data retrieved from disk and shortens processing time, thus improving query performance and optimizing resource utilization.
+Depending upon the actual SQL statement, Oracle Database may use static or dynamic pruning. 
+
+Static pruning occurs at compile-time, with the information about the partitions accessed beforehand. 
+Dynamic pruning occurs at run-time, meaning that the exact partitions to be accessed by a statement are not known beforehand. 
+
+A sample scenario for static pruning is a SQL statement containing a WHERE condition with a constant literal on the partition key column. 
+An example of dynamic pruning is the use of operators or functions in the WHERE condition.
