@@ -151,3 +151,6 @@ Global indexes are harder to manage than local indexes. At partition maintenance
 
 How to Determine Whether an Index is Global or Local
 To determine whether an index is global or local, query the column, LOCALITY, in DBA_PART_INDEXES.
+
+
+ORA-01555: snapshot too old: rollback segment number with name "" too small ORA-06512
