@@ -156,3 +156,5 @@ To determine whether an index is global or local, query the column, LOCALITY, in
 ORA-01555: snapshot too old: rollback segment number with name "" too small ORA-06512
 
 Connection prematurely closed BEFORE response; nested exception is reactor.netty.http.client.PrematureCloseException
+
+Did not observe any item or terminal signal within 3000ms in 'flatMap' (and no fallback has been configured)
