@@ -160,3 +160,5 @@ Connection prematurely closed BEFORE response; nested exception is reactor.netty
 Did not observe any item or terminal signal within 3000ms in 'flatMap' (and no fallback has been configured)
 
 setCronExpression("0 0/15 * * * ?")
+
+=IF(A2="MasterPay",IF(B2>25000,50,25),IF(A2="SwapyPay",IF(B2>25000,40,25),IF(A2="GoPay",IF(B2>25000,35,25),0)))
