@@ -210,3 +210,19 @@ BEGIN
 END;
 /
 
+CREATE OR REPLACE FUNCTION boolean_to_string(p_boolean BOOLEAN) RETURN VARCHAR2 IS
+BEGIN
+  IF p_boolean THEN
+    RETURN 'TRUE';
+  ELSE
+    RETURN 'FALSE';
+  END IF;
+END;
+/
+
+-- Usage Example
+DECLARE
+  l_success BOOLEAN := TRUE;
+BEGIN
+  DBMS_OUTPUT.PUT_LINE('Boolean value: ' || boolean_to_string(l_success));
+END;
