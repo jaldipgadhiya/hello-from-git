@@ -226,3 +226,43 @@ DECLARE
 BEGIN
   DBMS_OUTPUT.PUT_LINE('Boolean value: ' || boolean_to_string(l_success));
 END;
+
+
+
+DECLARE
+  req   UTL_HTTP.req;
+  resp  UTL_HTTP.resp;
+  url   VARCHAR2(32767) := 'http://example.com';
+  buffer VARCHAR2(32767);
+BEGIN
+  -- Initialize the HTTP request
+  req := UTL_HTTP.begin_request(url);
+
+  -- Set the timeout value (e.g., 120 seconds)
+  UTL_HTTP.set_transfer_timeout(req, 120);
+
+  -- Get the response
+  resp := UTL_HTTP.get_response(req);
+
+  -- Read the response
+  BEGIN
+    LOOP
+      UTL_HTTP.read_text(resp, buffer);
+      DBMS_OUTPUT.put_line(buffer);
+    END LOOP;
+  EXCEPTION
+    WHEN UTL_HTTP.end_of_body THEN
+      NULL;
+  END;
+
+  -- Close the response to free resources
+  UTL_HTTP.end_response(resp);
+EXCEPTION
+  WHEN OTHERS THEN
+    DBMS_OUTPUT.put_line(SQLERRM);
+    IF UTL_HTTP.is_open(req) THEN
+      UTL_HTTP.end_request(req);
+    END IF;
+END;
+/
+
