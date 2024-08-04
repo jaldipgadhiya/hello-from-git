@@ -1,0 +1,66 @@
+-- Function to handle 'Issuance Platform Flag'
+CREATE OR REPLACE FUNCTION handle_issuance_platform_flag(p_value VARCHAR2) RETURN VARCHAR2 IS
+BEGIN
+    -- Add specific logic for 'Issuance Platform Flag' here
+    RETURN 'Processed Issuance Platform Flag with value ' || p_value;
+END handle_issuance_platform_flag;
+/
+
+-- Function to handle 'Staging'
+CREATE OR REPLACE FUNCTION handle_staging(p_value VARCHAR2) RETURN VARCHAR2 IS
+BEGIN
+    -- Add specific logic for 'Staging' here
+    RETURN 'Processed Staging with value ' || p_value;
+END handle_staging;
+/
+
+-- Add more functions for other parameters similarly...
+
+
+CREATE OR REPLACE PROCEDURE process_functional_parameters(
+    p_master_policy_no IN NUMBER,
+    p_stage IN VARCHAR2
+) AS
+    CURSOR param_cursor IS
+        SELECT param_name, param_value, param_refer_value
+        FROM functional_parameters
+        WHERE master_policy_no = p_master_policy_no
+          AND param_stage LIKE '%' || p_stage || '%'
+          AND active_flag = 'Y';
+
+    v_param_name functional_parameters.param_name%TYPE;
+    v_param_value functional_parameters.param_value%TYPE;
+    v_param_refer_value functional_parameters.param_refer_value%TYPE;
+    v_result VARCHAR2(4000);
+
+BEGIN
+    OPEN param_cursor;
+    LOOP
+        FETCH param_cursor INTO v_param_name, v_param_value, v_param_refer_value;
+        EXIT WHEN param_cursor%NOTFOUND;
+
+        -- Add logic here to process each parameter based on its name and value
+        CASE v_param_name
+            WHEN 'Issuance Platform Flag' THEN
+                v_result := handle_issuance_platform_flag(v_param_value);
+            WHEN 'Staging' THEN
+                v_result := handle_staging(v_param_value);
+            WHEN 'Process Method' THEN
+                -- Call respective function for 'Process Method'
+            -- Add cases for other parameters similarly
+            ELSE
+                v_result := 'Unknown parameter: ' || v_param_name;
+        END CASE;
+
+        -- Display the result of processing
+        DBMS_OUTPUT.PUT_LINE(v_result);
+    END LOOP;
+    CLOSE param_cursor;
+END;
+/
+
+
+BEGIN
+    process_functional_parameters(1, 'PRECHECK');
+END;
+/
