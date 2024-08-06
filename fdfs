@@ -267,3 +267,16 @@ END;
 /
 
 https://teams.microsoft.com/l/meetup-join/19%3ameeting_NWYzNGY4MzMtMDJkNy00NzNlLWEwZTItMDUwOGNmODRjZTI4%40thread.v2/0?context=%7b%22Tid%22%3a%2246e36785-1a8f-46f4-9641-40872ab8ee0f%22%2c%22Oid%22%3a%22862826e4-0e82-4935-b329-e33ef4540631%22%7d
+
+
+Definition of Done (DOD) Criteria:
+Code Review: Ensure that all code changes have been reviewed and approved by at least one peer.
+Testing: All changes must pass unit tests, integration tests, and any relevant acceptance tests.
+Documentation: Update any relevant documentation, including code comments, README files, and Confluence pages.
+Deployment: Verify that the changes are deployed to the appropriate environment and are functioning as expected.
+Issue Closure: Ensure that the JIRA issue is properly updated with all necessary details and marked as done once the above steps are completed.
+Action Items:
+Please review the JIRA issues assigned to you and ensure they meet the DOD criteria.
+Attend the JIRA Calls on the scheduled dates to discuss progress, blockers, and next steps.
+Reach out to [Your Name] or [Relevant Contact Person] if you have any questions or need assistance.
+Thank you for your attention to this matter. Let's continue to maintain our high standards and work together to achieve our goals.
