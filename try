@@ -1,3 +1,5 @@
+getting Error-ORA-06530: Reference to uninitialized compositeORA-06512: at line 98 error in below mentioned pl/sql code. please suggest.
+
 /* Formatted on 09-08-2024 16:42:11 (QP5 v5.215.12089.38647) */
 DECLARE
    dummy           NUMBER;
@@ -108,3 +110,4 @@ EXCEPTION
       DBMS_OUTPUT.put_line (
          'Error-' || SQLERRM || DBMS_UTILITY.format_error_backtrace);
 END;
+
