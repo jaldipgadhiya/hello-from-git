@@ -1,0 +1,110 @@
+/* Formatted on 09-08-2024 16:42:11 (QP5 v5.215.12089.38647) */
+DECLARE
+   dummy           NUMBER;
+   p_result_list   AZBJ_GRP_WS_UPLOAD_list;
+   v_result_obj    AZBJ_GRP_WS_UPLOAD_obj;
+BEGIN
+   p_result_list := AZBJ_GRP_WS_UPLOAD_list ();
+   v_result_obj :=
+      NEW AZBJ_GRP_WS_UPLOAD_obj (NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  NULL);
+   v_result_obj.master_policy_no := '0123456789';
+   v_result_obj.gpit_obj.stringval1 := '4';
+
+   p_result_list.EXTEND (1);
+   p_result_list (p_result_list.COUNT ()) := v_result_obj;
+
+   try_obj (p_result_list);
+EXCEPTION
+   WHEN OTHERS
+   THEN
+      DBMS_OUTPUT.put_line (
+         'Error-' || SQLERRM || DBMS_UTILITY.format_error_backtrace);
+END;
