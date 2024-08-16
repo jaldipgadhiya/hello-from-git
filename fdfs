@@ -282,3 +282,5 @@ Reach out to [Your Name] or [Relevant Contact Person] if you have any questions 
 Thank you for your attention to this matter. Let's continue to maintain our high standards and work together to achieve our goals.
 
 I/O error on POST request for "https://balicportal.bajajallianzlife.com/webgroupgrpapi/service/api/bflrequestenc": Read timed out; nested exception is java.net.SocketTimeoutException: Read timed out
+
+sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
