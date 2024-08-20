@@ -309,3 +309,30 @@ Reach out to [Your Name] or [Relevant Contact Person] if you have any questions 
 Thank you for your attention to this matter. Let's continue to maintain our high standards and work together to achieve our goals.
 
 Best regards,
+
+
+
+Subject: Reminder: JIRA Calls and Completion Standards for the Upcoming Two Weeks
+
+Hello Team,
+
+I hope this mail finds you in good health.
+
+As we enter the upcoming two weeks, I just wanted to take out a moment to refresh the memories of everybody regarding our JIRA calls and the associated completion standards. Adherence to these from the perspective of work quality and consistency is very important.
+
+JIRA Calls Schedule:
+[Insert Date and Time for Week 1 Call]
+[Insert Date and Time for Week 2 Call]
+Completion Criteria:
+Code Review: All code changes should have been reviewed and approved by at least one peer.
+Testing: Changes should pass unit tests, integration tests and acceptance tests, where applicable
+Documentation: Any relevant documentation will include maintenance in code comments, README files, and Confluence pages
+Deployments: Verify changes deployed to the right environment and functioning according to plan.
+Issue Closure: The JIRA issue should be updated with all the details and marked as done only after the completion of the above-mentioned steps.
+Action Items:
+Kindly review the assigned JIRA issues, ensuring that they meet the Completion Standards.
+Join the JIRA Calls scheduled on the below-mentioned dates for discussion of progress, blockers, and next steps.
+Contact [Your Name] or [Relevant Contact Person] in case of any clarification or support.
+Thank you for your attention to this matter. Let's keep up the good work to our high standards of performance and continue to work as a team in the achievement of our objectives.
+
+Best regards,
