@@ -1,1 +1,32 @@
 https://instalearn2.disprz.com/#!/module/51950/20229
+
+error on POST request for "https://saksham.axisbank.co.in/gateway/api/rcm/v1/docupload": Unrecognized SSL message, plaintext connection?; nested exception is javax.net.ssl.SSLException: Unrecognized SSL message, plaintext connection?
+2024-10-30 14:07:38,317 INFO c.b.a.s.FileUploadServiceInterfaceImpl [Thread-123] responseCode of Axis api:::>>>>null
+2024-10-30 14:07:38,317 INFO c.b.a.s.FileUploadServiceInterfaceImpl [Thread-123] In Service Exception::>>>null
+2024-10-30 14:07:38,317 INFO c.b.a.s.FileUploadServiceInterfaceImpl [Thread-123] EntrySet data::::>>>>||entrySet.getKey()::>>PROPOSAL FORM||entrySet.getValue():::>>6135602038_505775261_Proposal Form_PDF
+2024-10-30 14:07:38,317 INFO c.b.a.r.RestClient [Thread-123] applNo::::>>>6135602038
+leadId- by Jaldip Gadhiya/Pune HO/Technology/Life
+18:14
+Jaldip Gadhiya/Pune HO/Technology/Life
+leadId-
+Link https://saksham.axisbank by Jaldip Gadhiya/Pune HO/Technology/Life
+18:19
+Jaldip Gadhiya/Pune HO/Technology/Life
+https://saksham.axisbank
+Chaithanya Reddy/Pune HO/Technology/Life added Manish Dhole01(Outsource-Precision)/Pune HO/Technology/Life to the chat.
+Chaithanya Reddy/Pune HO/Technology/Life added Manish Dhole01(Outsource-Precision)/Pune HO/Technology/Life to the chat.
+Last read
+2024-10-30 14:07:38,317 INFO c.b.a.r.RestCl... by Chaithanya Reddy/Pune HO/Technology/Life
+Chaithanya Reddy/Pune HO/Technology/Life
+18:30
+2024-10-30 14:07:38,317 INFO c.b.a.r.RestClient [Thread-123] Inside Exception of UploadDocs API CallI/O error on POST request for "https://saksham.axisbank.co.in/gateway/api/rcm/v1/docupload": Unrecognized SSL message, plaintext connection?; nested exception is javax.net.ssl.SSLException: Unrecognized SSL message, plaintext connection?
+2024-10-30 14:07:38,317 INFO c.b.a.s.FileUploadServiceInterfaceImpl [Thread-123] responseCode of Axis api:::>>>>null
+2024-10-30 14:07:38,317 INFO c.b.a.s.FileUploadServiceInterfaceImpl [Thread-123] In Service Exception::>>>null
+2024-10-30 14:07:38,317 INFO c.b.a.s.FileUploadServiceInterfaceImpl [Thread-123] EntrySet data::::>>>>||entrySet.getKey()::>>PROPOSAL FORM||entrySet.getValue():::>>6135602038_505775261_Proposal Form_PDF
+2024-10-30 14:07:38,317 INFO c.b.a.r.RestClient [Thread-123] applNo::::>>>6135602038
+source : 10.3.8.18 by Chaithanya Reddy/Pune HO/Technology/Life
+Chaithanya Reddy/Pune HO/Technology/Life
+18:30
+source : 10.3.8.18
+has context menu
+New messa
