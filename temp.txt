@@ -30,3 +30,167 @@ Chaithanya Reddy/Pune HO/Technology/Life
 source : 10.3.8.18
 has context menu
 New messa
+
+
+private static SSLContext getSSLSocketFactory(String PFX_location, String PFX_Password) throws Exception {
+		SSLContext context = null;
+		File pKeyFile = new File(PFX_location);
+		KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
+		KeyStore keyStore = KeyStore.getInstance(APIConstants.CLIENT_KEYSTORE_TYPE);
+		InputStream keyInput = new FileInputStream(pKeyFile);
+		keyStore.load(keyInput, PFX_Password.toCharArray());
+		keyInput.close();
+		keyManagerFactory.init(keyStore, PFX_Password.toCharArray());
+		context = SSLContext.getInstance("TLS");
+		context.init(keyManagerFactory.getKeyManagers(), null, new SecureRandom());
+		return context;
+	}
+
+	// Axis file Upload API consume Call
+	public static String uploadDocs(String base64String,String applNo, String policyNo, String leadNo, String docname, String uniqueValue, String docType, String extenstion) throws Exception {
+		//System.out.println("base64::::"+base64String);
+		System.out.println("extension:::::>>>>"+extenstion);
+		log.info("extension:::::>>>>"+extenstion);
+		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+		LocalDateTime currentDate = LocalDateTime.now();
+		System.out.println(dtf.format(currentDate));
+		log.info(dtf.format(currentDate));
+		if(leadNo ==null || leadNo.equalsIgnoreCase("null")) {
+			leadNo = "";
+		}
+		
+		if(policyNo == null || policyNo.equalsIgnoreCase("null")) {
+			policyNo = "";
+		}
+		
+			
+		String request = "{\r\n" + 
+				"  \"partnerName\": \"BALIC\",\r\n" + 
+				"  \"channelName\": \"D2C\",\r\n" + 
+				"  \"documentDetails\": {\r\n" + 
+				"    \"leadId\": \""+leadNo+"\",\r\n" + 
+				"    \"proposalNo\": \""+policyNo+"\",\r\n" + 
+				"    \"applicationNo\": \""+applNo+"\",\r\n" + 
+				"    \"policyNo\": \""+policyNo+"\",\r\n" + 
+				"    \"memberId\": \"\",\r\n" + 
+				"    \"docName\": \""+docname+"."+extenstion+"\",\r\n" + 
+				"    \"docType\": \""+docType+"\",\r\n" + 
+				"    \"docKey\": \"\",\r\n" + 
+				"    \"docFile\": \""+base64String+"\",\r\n" + 
+				"    \"docUrl\": \"\",\r\n" + 
+				"    \"issuanceDt\": \""+dtf.format(currentDate)+"\"\r\n" + 
+				"  }\r\n" + 
+				"}";
+		
+		DateTimeFormatter dtf1 = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+		LocalDateTime nowReq = LocalDateTime.now();
+		String reqTime = (dtf1.format(nowReq)).toString();
+	
+		// Column Names APP_NO,POLICY_NO,DOC_NAME,REQUEST,REQUEST_TIME,FIELD1,FIELD2,FIELD3,FIELD4,FIELD5,CREATE_DATE,CREATE_USER
+		//DAO call for request storing
+		AxisFileUploadDao dao = new AxisFileUploadDao();
+		//Removed Request Due DB Limit exceeding
+		String resp = dao.saveReqAnddRespDetails(applNo, policyNo, docname+"."+extenstion, "null", reqTime);
+		System.out.println("Resp of save data::>>" + resp);
+		log.info("Resp of save data::>>" + resp);
+		System.out.println("AXIS Record Mangement Req of::>>" + resp);
+		System.out.println("leadId-"+leadNo+"~proposalNo-"+policyNo+"~applicationNo-"+applNo+"~policyNo-"+policyNo+"~docName-"+docname+"."+extenstion+"~docType-"+docType+"docFileLength-"+base64String.length()+"~issuanceDt-"+dtf.format(currentDate));
+		//Encrypting request payload
+		String encryptedRequest  = AxisEncryptionDecryption.axisFileUploadEncryption(FileUploadStringConstants.BALIC_E2E_SECRET_KEY, request);
+		
+		String encryptedRequestPayload = "{\r\n" + 
+				"  \"payload\": \""+encryptedRequest+"\"\r\n" + 
+				"}";
+		
+		System.out.println("Inside the Axis file Upload API consume Method Call");
+		
+		SSLContext context = getSSLSocketFactory(APIConstants.CLIENT_KEYSTORE_PATH, APIConstants.CLIENT_KEYSTORE_PASS);
+		// SSLSocketFactory sockFact = context.getSocketFactory();
+		HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+		HttpClient client = HttpClients.custom().setSSLContext(context).build();
+		requestFactory.setHttpClient(client);
+		requestFactory.setBufferRequestBody(false);
+		RestTemplate restTemplate = new RestTemplate(requestFactory);
+		HttpHeaders header = new HttpHeaders();
+		
+		long now = Instant.now().toEpochMilli();
+		System.out.println("now:::::>>>"+now);
+		log.info("now:::::>>>"+now);
+		
+		try {
+			
+			header.setContentType(MediaType.APPLICATION_JSON);
+			
+			//UAT clientId and scret Id
+			//header.add("X-IBM-Client-Id", "1d3aa43c-753f-4ab7-b49c-e643bdc29af6");
+			//header.add("X-IBM-Client-Secret", "X5tF5lQ5uR5fI4yP1pP6xX3aQ5jG4kJ6aM6nS3cE2tV8lO6iM1");
+			
+			//Production clientId and scret Id
+			//header.add("X-IBM-Client-Id", "81dc74a811cc4e55ecf1cd4441a680b9"); //expired on 30/06/2023
+			//header.add("X-IBM-Client-Secret", "337be639fdf10cb4fc60de724cb8ef31");
+			
+			//header.add("X-IBM-Client-Id", "2e6a7ce1acf10d03f4afccc70c3b67f1");
+			//header.add("X-IBM-Client-Secret", "858abb76f90392660032ec19d4ceb55d");
+			
+			header.add("X-IBM-Client-Id", "4ca736822fb93404f8f220896f962e7b");
+			header.add("X-IBM-Client-Secret", "0025fc7d0d7eba857596e35cda9b9623");
+			
+			header.add("x-fapi-epoch-millis", String.valueOf(now));
+			header.add("x-fapi-channel-id", "BALIC");
+			header.add("x-fapi-uuid", uniqueValue);
+			header.add("AccessKey", "balic");
+			
+			HttpEntity<String> entity = new HttpEntity<>(encryptedRequestPayload,header);
+			
+			ResponseEntity<String> fileUploadResponse = restTemplate.postForEntity(APIConstants.DOCUPLOADURL, entity, String.class);
+			
+			System.out.println("fileUploadResponse::::::>>>>>" + fileUploadResponse.getBody());
+			JSONObject jsonOjbect = new JSONObject(fileUploadResponse.getBody());
+			String respPayload = (String) jsonOjbect.get("payload");
+			System.out.println("respPayload:::::>>>>>"+respPayload);
+			log.info("respPayload:::::>>>>>"+respPayload);
+			String decryptedResp = AxisEncryptionDecryption.axisFileUploadDecryption(FileUploadStringConstants.BALIC_E2E_SECRET_KEY, respPayload);
+			System.out.println("decryptedResp::::>>>>"+decryptedResp);
+			log.info("decryptedResp::::>>>>"+decryptedResp);
+			return decryptedResp;
+			//return new ResponseEntity<Object>(decryptedResp, HttpStatus.OK);
+			
+		} catch (Exception ex) {
+			System.out.println("Inside Exception of UploadDocs API Call"+ex.getMessage());
+			log.info("Inside Exception of UploadDocs API Call"+ex.getMessage());
+			ex.printStackTrace();
+		}
+		return null;
+	}
+
+	// Get the base64 from OMNI is consumed below API
+	public static String getBase64String(String applNo, String docName) {
+		System.out.println("applNo::::>>>"+applNo);
+		log.info("applNo::::>>>"+applNo);
+		System.out.println("docName::::>>>"+docName);
+		log.info("docName::::>>>"+docName);
+		String inputLine;
+		try {
+			URL url = new URL(APIConstants.getBase64Url + "?" + "ApplicationNo="+applNo+"&documentType="+docName+"");
+			HttpURLConnection con = (HttpURLConnection) url.openConnection();
+			con.setRequestMethod("GET");
+			System.out.println("Response code of doc download api::::>>>" + con.getResponseCode());
+			log.info("Response code of doc download api::::>>>" + con.getResponseCode());
+			if (con.getResponseCode() == 200) {
+				BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+				if ((inputLine = in.readLine()) != null) {
+					// System.out.println(inputLine);
+					return inputLine;
+				} else {
+					throw new RequestParamNotFoundException("InputLine Is getting null...!");
+				}
+			} else {
+				throw new DocDownloadApiRespException(con.getResponseMessage() + "||" + con.getResponseCode());
+			}
+		} catch (Exception ex) {
+			System.out.println("Inside The Exception getBase64 API"+ex.getMessage());
+			log.info("Inside The Exception getBase64 API"+ex.getMessage());
+			ex.printStackTrace();
+		}
+		return null;
+	}
