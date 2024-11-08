@@ -27,3 +27,24 @@
 27. What are differences between HashSet and TreeSet?
 28. What is Map?
 29. What are differences between HashMap and HashTable?
+
+
+SELECT 
+    e.Employee_ID,
+    e.Employee_Name,
+    TRIM(x.Skill) AS Skill
+FROM 
+    Employees e,
+    XMLTABLE(
+        ('"' || REPLACE(e.Skills, '|', '","') || '"')
+        PASSING NULL
+        COLUMNS Skill VARCHAR2(100) PATH '/Skill'
+    ) x
+WHERE 
+    XMLExists(
+        'for $i in /Skill return $i'
+        , XMLTYPE('<Skills><Skill>' || REPLACE(e.Skills, '|', '</Skill><Skill>') || '</Skill></Skills>')
+    )
+ORDER BY 
+    e.Employee_ID;
+
