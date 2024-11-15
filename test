@@ -48,3 +48,25 @@ WHERE
 ORDER BY 
     e.Employee_ID;
 
+
+WITH q1
+           AS (SELECT c.*
+                 FROM azbj_lms_lead_dtls a,
+                      azbj_pit_cust_details b,
+                      azbj_digi_axis_reverse_feed c
+                WHERE     a.tpa_lead_no = b.partner_lead_id
+                      AND a.tpa_lead_no = c.axis_lead_no
+                      AND tpa = 'AXIS_DIGIBANCA'
+                      AND TRUNC (register_date) >=
+                             (SELECT date_value
+                                FROM azbj_system_constants
+                               WHERE     sys_type = 'RETAIL_PIT'
+                                     AND sys_code =
+                                            'AZBJ_AXIS_IBMB_TC_SCH_DATE')
+                      AND a.top_indicator = 'Y'
+                      AND c.top_indicator = 'Y'
+                      AND (SYSDATE - create_date) * 24 * 60 > 5
+                      AND curr_status_number NOT IN (48)
+                      AND NVL (TC_FLAG, 'N') = 'N')
+      SELECT *
+        FROM q1;
