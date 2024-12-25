@@ -221,3 +221,5 @@ Application is - https://webportal.bajajallianz.com/PartnerGrpWS/partner
 a.	Transaction per hour
 b.	Transaction per minutes
 c.	Transaction per day
+
+Yesterday 707 cases got issued and today haven’t received any requests of Issuance API. Can you please share the request and response of few cases logged at your side.
