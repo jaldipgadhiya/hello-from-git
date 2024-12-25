@@ -209,3 +209,15 @@ where azbj_sys_const_utils.get_char_val('RETAIL','AXIS_REC_MGMT_LOGS_FLAG') = 'Y
 <org.springframework.web.client.ResourceAccessException: I/O error on POST request for  sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target; nested exception is javax.net.ssl.SSLHandshakeException: sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target> 
 
 how to set "null" string in blob.setBytes(1, "");
+
+
+Please share below mentioned details to understand the load taking capacity for the said API. Same need to be provided to AXIS Team.
+
+Application is - https://webportal.bajajallianz.com/PartnerGrpWS/partner
+
+1.	Production URL
+2.	IP address
+3.	Below information 
+a.	Transaction per hour
+b.	Transaction per minutes
+c.	Transaction per day
