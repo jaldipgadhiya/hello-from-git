@@ -235,3 +235,157 @@ b.	Transaction per minutes – (Highest Hits Per 10 Minutes during the day - 249
 c.	Transaction per day - 8.64k
 
 Also please share if any other Prod IP whitelisting required at our side and approx. expected transactions per day.
+
+
+
+FOR k IN 1 .. p_azbj_grp_result_list.COUNT
+         LOOP
+            IF (   p_azbj_grp_result_list (k).ERROR_DESCRIPTION LIKE
+                      '%Memeber Already Proceesed%'
+                OR p_azbj_grp_result_list (k).ERROR_DESCRIPTION IS NOT NULL)
+            THEN
+               UPDATE AZBJ_BFL_TDMC_UPLOAD_DETAIL
+                  SET FLAG = 'E',
+                      error_desc =
+                         p_azbj_grp_result_list (k).ERROR_DESCRIPTION,
+                      UPDATE_DATE = SYSDATE
+                WHERE MEMERSHIP_NO = p_azbj_grp_result_list (k).MEMBERSHIP_NO;
+
+               DELETE FROM AZBJ_TDMC_UPLOAD_DETAIL
+                     WHERE     MEMERSHIP_NO =
+                                  p_azbj_grp_result_list (k).MEMBERSHIP_NO
+                           AND POLICY_REF IS NULL;
+
+               DELETE FROM AZBJ_GRP_UPLOAD_DETAIL
+                     WHERE     MEMBER_CODE =
+                                  p_azbj_grp_result_list (k).MEMBERSHIP_NO
+                           AND CERTIFICATE_POLICY_NO IS NULL;
+
+
+               COMMIT;
+            ELSE
+               p_azbj_grp_result_list.DELETE;
+
+               BEGIN
+                  SELECT scheme_type
+                    INTO V_SCHEME_TYPE
+                    FROM azbj_grp_upload_detail
+                   WHERE     master_policy_no =
+                                p_upload_list (K).master_policy_no
+                         --AND a.upload_date = p_upload_date
+                         --AND a.upload_type = b.upload_type
+                         AND record_status = 'CALCULATED'
+                         AND member_code = p_upload_list (K).membership_no;
+               EXCEPTION
+                  WHEN OTHERS
+                  THEN
+                     V_SCHEME_TYPE:=NULL; -- REPLACED GSJS WITH NULL    
+               END;
+               
+               IF V_SCHEME_TYPE IS NOT NULL THEN --ADDED THIS CONDITION FOR PROD ISSUE
+
+                   BEGIN
+                      SELECT LPAD (TO_CHAR (azbj_member_policy_seq.NEXTVAL),
+                                   9,
+                                   '0')
+                        INTO v_certificate_seq
+                        FROM DUAL;
+                   EXCEPTION
+                      WHEN OTHERS
+                      THEN
+                         v_certificate_seq := 0;
+                   END;
+
+
+                   v_certificate_policy_no :=
+                      V_SCHEME_TYPE || '_' || v_certificate_seq;
+
+                   UPDATE AZBJ_BFL_TDMC_UPLOAD_DETAIL
+                      SET POLICY_REF = v_certificate_policy_no, FLAG = 'Y'
+                    WHERE     MEMERSHIP_NO = p_upload_list (K).membership_no
+                          AND FLAG = 'N';
+
+                   UPDATE AZBJ_TDMC_UPLOAD_DETAIL
+                      SET POLICY_REF = v_certificate_policy_no
+                    WHERE     MEMERSHIP_NO = p_upload_list (K).membership_no
+                          AND POLICY_REF IS NULL;
+
+                   UPDATE AZBJ_GRP_UPLOAD_DETAIL
+                      SET CERTIFICATE_POLICY_NO = v_certificate_policy_no
+                    WHERE     MEMBER_CODE = p_upload_list (K).membership_no
+                          AND CERTIFICATE_POLICY_NO IS NULL;
+
+                   COMMIT;
+
+
+                   BEGIN
+                      SELECT ROUND (
+                                  NVL (basic_life_cover_premium, 0)
+                                + NVL (adb_premium, 0)
+                                + NVL (tpd_ppd_premium, 0)
+                                + NVL (illness_rider_premium, 0)
+                                + NVL (accel_crit_illness_rider_prem, 0)
+                                + NVL (service_tax_rate, 0),
+                                0),
+                             NVL (service_tax_rate, 0)
+                        INTO v_prem_without_st, v_prem_st
+                        FROM azbj_grp_upload_detail
+                       WHERE     master_policy_no =
+                                    p_upload_list (K).master_policy_no
+                             AND member_code = p_upload_list (K).membership_no
+                             AND upload_type IN ('NB', 'MA')
+                             AND record_status IN ('CALCULATED');
+                   EXCEPTION
+                      WHEN OTHERS
+                      THEN
+                         v_prem_without_st := 0;
+                         v_prem_st := 0;
+                   END;
+
+                   BEGIN
+                      SELECT RISK_COVERAGE_START_DATE, RISK_COVERAGE_END_DATE
+                        INTO V_RISK_COVERAGE_START_DATE, V_RISK_COVERAGE_END_DATE
+                        FROM azbj_grp_upload_detail
+                       WHERE     master_policy_no =
+                                    p_upload_list (K).master_policy_no
+                             AND member_code = p_upload_list (K).membership_no
+                             AND upload_type IN ('NB', 'MA')
+                             AND record_status IN ('CALCULATED');
+                   EXCEPTION
+                      WHEN OTHERS
+                      THEN
+                         V_RISK_COVERAGE_START_DATE := NULL;
+                         V_RISK_COVERAGE_END_DATE := NULL;
+                   END;
+
+                   add_ws_result (p_upload_list (K).membership_no,
+                                  p_upload_list (K).master_policy_no,
+                                  NULL,
+                                  v_batch_id,
+                                  v_prem_without_st,
+                                  v_prem_st,
+                                  v_certificate_policy_no,
+                                  'ISSUED',
+                                  V_RISK_COVERAGE_START_DATE,
+                                  V_RISK_COVERAGE_END_DATE);
+
+                   RETURN;
+               --ADDED ELSE FOR PROD ISSUE
+               ELSE
+                             V_error_desc :=
+                             'Something went wrong, please try after some time';
+
+                                add_ws_result (p_upload_list (i).membership_no,
+                                      p_upload_list (i).master_policy_no,
+                                      V_error_desc,
+                                      v_batch_id,
+                                      v_prem_without_st,
+                                      v_prem_st,
+                                      NULL,
+                                      NULL,NULL,NULL);
+
+                            RETURN;
+                                    
+               END IF;                   
+            END IF;
+         END LOOP;
