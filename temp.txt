@@ -223,3 +223,15 @@ b.	Transaction per minutes
 c.	Transaction per day
 
 Yesterday 707 cases got issued and today haven’t received any requests of Issuance API. Can you please share the request and response of few cases logged at your side.
+
+
+Please find the below mentioned required details.
+
+1.	Production URL - https://webportal.bajajallianz.com/PartnerGrpWS/partner/partnerGroupAXISEnc/partnerGroupPremCalcAXISEnc
+2.	IP address - 202.90.192.228 (Public Prod server IP address)
+3.	Below information(Please note below mentioned stats is for the hits received on the existing prod application) 
+a.	Transaction per hour - 1.54K(This count is for selected random 1hour might be hits can be more than given count depends how the API is consume at different time frames)
+b.	Transaction per minutes – (Highest Hits Per 10 Minutes during the day - 249)
+c.	Transaction per day - 8.64k
+
+Also please share if any other Prod IP whitelisting required at our side and approx. expected transactions per day.
