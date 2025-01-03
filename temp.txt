@@ -4,6 +4,11 @@ Z9K8Y1N4B7L3Q2X5
 
 X5G7K2M9Q1L8Z4B6
 
+As discussed, provided list of leads have already been assigned for tele calling and as per existing logic leads are being considered for tele calling once user redirects to digibanca platform and inactive for 5 minutes. If user drops the journey before or during redirection then in that case leads are not being considered for tele calling.
+
+Additionally, please confirm further which approach to be finalized for tele calling if need to go with new approach through LMS and scrap the existing approach as per our last discussion then please raise a new call accordingly.  
+
+
 <Error while decrypting: javax.crypto.IllegalBlockSizeException: Input length must be multiple of 16 when decrypting with padded cipher>
 
 package com.bajajallianz.mph.utility;
