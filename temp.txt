@@ -1,3 +1,30 @@
+private static SSLContext getSSLSocketFactory(String keyStorePath, String keyStorePassword,
+                                              String trustStorePath, String trustStorePassword) throws Exception {
+    // Load client keystore
+    KeyStore keyStore = KeyStore.getInstance(CLIENT_KEYSTORE_TYPE);
+    try (InputStream keyInput = new FileInputStream(new File(keyStorePath))) {
+        keyStore.load(keyInput, keyStorePassword.toCharArray());
+    }
+    KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
+    keyManagerFactory.init(keyStore, keyStorePassword.toCharArray());
+
+    // Load truststore
+    KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+    try (InputStream trustInput = new FileInputStream(new File(trustStorePath))) {
+        trustStore.load(trustInput, trustStorePassword.toCharArray());
+    }
+    TrustManagerFactory trustManagerFactory = 
+            TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+    trustManagerFactory.init(trustStore);
+
+    // Initialize SSLContext explicitly with TLSv1.2
+    SSLContext context = SSLContext.getInstance("TLSv1.2");
+    context.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), new SecureRandom());
+
+    return context;
+}
+
+
 PUEJ7BT1Q7LPATGY
 
 Z9K8Y1N4B7L3Q2X5
