@@ -1,3 +1,27 @@
+Cisco Systems (2001): Building and Sustaining a 
+Customer-Centric Culture
+Customer centricity has been an important part of the culture at Cisco Systems since its 
+inception. While part of this is attributable to values put in place by the founders and retained 
+by subsequent management, it is also closely interwoven with its organizational architecture 
+that reaffirmed those values.
+Until 2001, Cisco had a decentralized organizational structure with three business units 
+organized around each of its three main customer types: Service Provider, Enterprise, and 
+Commercial. Each unit developed and marketed a complete product line for its specific 
+customer group, further reaffirming its belief in the centrality of distinct customers. 
+A number of other systems, structures, and behavioral mechanisms reaffirmed the importance 
+of customer centricity. The 2001 market downturn, however, brought new challenges as Cisco 
+was forced to lay off 18% of its workforce and reexamine its organizational structure that was 
+costly due to duplication of activities across each of the three customer-facing business units.
+Ultimately, Cisco Systems decided to transform the company from a decentralized to 
+centralized organization. While recognizing that a centralized, functional structure was 
+necessary to avoid product and resource redundancies, it also threatened Cisco's customercentricity in that the centralization of R & D and marketing made them more distant from 
+Cisco's customers. 
+To overcome the perceived misalignment between its structure and culture, Cisco introduced a 
+number of initiatives like the Customer Focus Initiative (CFI) to ensure that while the structure 
+was turning away from customer centricity, the beliefs and actions of its employees maintained 
+that focus. In doing so, management accepted the likely misalignment between its structure and 
+culture and sought ways to compensate for this perceived gap
+
 private static SSLContext getSSLSocketFactory(String keyStorePath, String keyStorePassword,
                                               String trustStorePath, String trustStorePassword) throws Exception {
     // Load client keystore
